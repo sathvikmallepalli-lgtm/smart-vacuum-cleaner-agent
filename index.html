@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#164f60" />
+    <title>Roomwise — Smart Vacuum Agent</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="agent.js"></script>
+    <script defer src="room.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="#">◉ <span>Roomwise</span></a
+      ><span class="course">FOA / PBL 6</span
+      ><button id="help-button" class="quiet">How it works</button>
+    </header>
+    <main>
+      <section class="intro">
+        <div>
+          <h1>A cleaner room.<br />A smarter next move.</h1>
+          <p>
+            Build a room, place some dirt, and watch an AI agent decide what to
+            do next. Every decision is yours to inspect.
+          </p>
+        </div>
+        <div class="project-note">
+          <span class="note-icon">⌘</span
+          ><strong>A classroom AI laboratory</strong
+          ><span>Rules · Memory · Breadth-first search</span
+          ><span>Entirely simulated. No physical hardware.</span>
+        </div>
+      </section>
+      <div class="workspace">
+        <section class="room-panel" aria-labelledby="room-title">
+          <div class="panel-heading">
+            <div>
+              <h2 id="room-title">Your room</h2>
+              <p>8 × 8 cells. One curious cleaning agent.</p>
+            </div>
+            <span id="status" class="status">Ready</span>
+          </div>
+          <div class="setup">
+            <label
+              >Room layout<select id="preset">
+                <option value="obstacles">Around the furniture</option>
+                <option value="open">Open room</option>
+                <option value="corridor">Winding corridor</option>
+                <option value="unreachable">Unreachable corner</option>
+              </select></label
+            ><button id="clear" class="quiet">Clear room</button>
+          </div>
+          <div class="tool-row" role="group" aria-label="Room editing tool">
+            <span>Place</span
+            ><button data-tool="dirt" aria-pressed="true">✦ Dirt</button
+            ><button data-tool="wall" aria-pressed="false">▧ Obstacle</button
+            ><button data-tool="start" aria-pressed="false">◉ Agent</button
+            ><button data-tool="erase" aria-pressed="false">⌫ Erase</button>
+          </div>
+          <p id="edit-hint" class="hint">
+            Click a cell to add dirt. Choose Erase to remove it.
+          </p>
+          <div class="floor-wrap">
+            <div
+              id="grid"
+              class="grid"
+              role="group"
+              aria-label="Editable simulated room"
+            ></div>
+          </div>
+          <div class="legend">
+            <span><i class="legend-agent">◉</i> Agent</span
+            ><span><i class="legend-dirt">✦</i> Dirt</span
+            ><span><i class="legend-wall">▧</i> Obstacle</span
+            ><span><i class="legend-visited">✓</i> Visited</span
+            ><span><i class="legend-route">·</i> Planned route</span>
+          </div>
+          <div class="run-controls">
+            <button id="start" class="primary">▶ Start cleaning</button
+            ><button id="pause">Ⅱ Pause</button
+            ><button id="step">Single step</button
+            ><button id="reset" class="quiet">↺ Reset</button>
+          </div>
+          <div class="speed-row">
+            <label for="speed">Animation speed</label
+            ><input id="speed" type="range" min="1" max="5" value="3" /><output
+              id="speed-value"
+              for="speed"
+              >Normal</output
+            >
+          </div>
+        </section>
+        <aside class="agent-panel" aria-labelledby="agent-title">
+          <h2 id="agent-title">Inside the agent</h2>
+          <label class="field"
+            >Agent strategy<select id="mode">
+              <option value="memory">Memory + BFS</option>
+              <option value="reflex">Simple reflex</option>
+            </select></label
+          >
+          <p id="mode-description" class="hint">
+            Remembers visited cells and searches for the nearest unexplored
+            cell.
+          </p>
+          <div class="two-fields">
+            <label class="field"
+              >Random seed<input
+                id="seed"
+                type="number"
+                value="42"
+                min="0"
+                max="4294967295"
+                step="1" /></label
+            ><label class="field"
+              >Action limit<input
+                id="budget"
+                type="number"
+                value="500"
+                min="1"
+                max="10000"
+                step="1"
+            /></label>
+          </div>
+          <div class="decision" aria-live="polite" aria-atomic="true">
+            <span class="decision-label">Current decision</span
+            ><strong id="decision-title">Ready to explore</strong>
+            <p id="decision-text">
+              Start cleaning, or use Single step to follow one decision at a
+              time.
+            </p>
+          </div>
+          <div class="perception">
+            <h3>What it can sense</h3>
+            <p id="sensor-text">
+              Dirt under the agent and free or blocked neighboring cells.
+            </p>
+            <label class="check"
+              ><input id="agent-view" type="checkbox" /> Show only what the
+              agent knows</label
+            >
+            <p class="hint">
+              Unknown cells are shaded; distant dirt is hidden. Reflex agents
+              retain no map.
+            </p>
+          </div>
+          <h3>Room performance</h3>
+          <div class="metrics">
+            <div>
+              <strong id="remaining">12</strong><span>Dirt remaining</span>
+            </div>
+            <div><strong id="moves">0</strong><span>Moves made</span></div>
+            <div>
+              <strong id="cleans">0</strong><span>Cleaning actions</span>
+            </div>
+            <div>
+              <strong id="coverage">2%</strong><span>Reachable coverage</span>
+            </div>
+          </div>
+          <div class="progress-label">
+            <span>Reachable dirt cleaned</span
+            ><strong id="clean-percent">0%</strong>
+          </div>
+          <progress id="clean-progress" value="0" max="100">0%</progress>
+          <p id="result-note" class="hint">
+            Metrics are calculated separately from the agent's decisions.
+          </p>
+          <details class="log-details" open>
+            <summary>
+              Decision history <span id="action-count">0 actions</span>
+            </summary>
+            <ol id="log" class="log">
+              <li>Decisions will appear here as the agent runs.</li>
+            </ol>
+          </details>
+        </aside>
+      </div>
+      <section class="comparison" aria-labelledby="comparison-title">
+        <div class="section-heading">
+          <div>
+            <h2 id="comparison-title">Does memory make a difference?</h2>
+            <p>
+              Run both strategies on your original room with the same start and
+              action limit.
+            </p>
+          </div>
+          <div class="compare-actions">
+            <button id="compare" class="primary">Compare agents</button
+            ><button id="export" class="quiet" disabled>
+              Download results
+            </button>
+          </div>
+        </div>
+        <p class="hint">
+          The reflex agent chooses randomly using your seed. It may revisit
+          cells and runs until the limit or until it cannot move. The memory
+          agent stops when exploration is complete.
+        </p>
+        <div id="comparison-result" class="comparison-empty">
+          Your experiment results will appear here.
+        </div>
+        <details id="csv-preview" hidden>
+          <summary>
+            CSV results — copy if your browser blocks the download
+          </summary>
+          <label for="csv-text" class="sr-only">Comparison results as CSV</label
+          ><textarea id="csv-text" readonly spellcheck="false"></textarea>
+        </details>
+      </section>
+      <section id="learn" class="learn">
+        <h2>From a room to an intelligent agent</h2>
+        <div class="learn-grid">
+          <article>
+            <span class="concept-symbol">◎</span>
+            <h3>Perceive</h3>
+            <p>
+              The agent senses dirt in its cell and checks the four neighbors.
+              It cannot see hidden dirt across the room.
+            </p>
+          </article>
+          <article>
+            <span class="concept-symbol">⌁</span>
+            <h3>Decide</h3>
+            <p>
+              If dirty, clean. Otherwise, the memory agent uses BFS on its
+              discovered map to find the nearest unvisited cell.
+            </p>
+          </article>
+          <article>
+            <span class="concept-symbol">↗</span>
+            <h3>Act</h3>
+            <p>
+              Move one cell or remove one patch of dirt. The next observation
+              begins the cycle again.
+            </p>
+          </article>
+        </div>
+        <details>
+          <summary>PEAS, assumptions, and limitations</summary>
+          <div class="peas">
+            <p>
+              <strong>Performance:</strong> reachable dirt cleaned, visited-cell
+              coverage, and action count.
+            </p>
+            <p>
+              <strong>Environment:</strong> a static, discrete grid with dirt
+              and obstacles.
+            </p>
+            <p>
+              <strong>Actuators:</strong> move up, right, down, left; clean;
+              stop.
+            </p>
+            <p>
+              <strong>Sensors:</strong> current-cell dirt and adjacent
+              occupancy.
+            </p>
+            <p>
+              Movement is deterministic; cleaning removes a patch in one action.
+              Visited cells do not necessarily mean the whole real-world floor
+              is clean. Obstacles can make dirt unreachable. BFS finds shortest
+              paths to known targets, not an optimal whole-room cleaning tour.
+              The simulator sees the complete room for rendering and evaluation;
+              the agent receives local observations only.
+            </p>
+          </div>
+        </details>
+      </section>
+      <footer>
+        <div>
+          <strong>Smart Vacuum Cleaner Agent</strong
+          ><span
+            >Second-year B.Tech · Fundamentals of Artificial Intelligence</span
+          >
+        </div>
+        <p>Developed as a student team project · Online simulation</p>
+      </footer>
+    </main>
+    <div id="notice" class="notice" role="status" hidden></div>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+room,strategy,seed,budget,moves,cleans,actions,coverage,reachableDirtCleaned,remaining,unreachable,end
+"open","memory",42,500,65,10,75,100,100,0,0,"Reachable room explored"
+"open","reflex",42,500,490,10,500,100,100,0,0,"Action limit reached"
+"obstacles","memory",42,500,59,12,71,100,100,0,0,"Reachable room explored"
+"obstacles","reflex",42,500,488,12,500,92.59,100,0,0,"Action limit reached"
+"corridor","memory",42,500,35,8,43,100,100,0,0,"Reachable room explored"
+"corridor","reflex",42,500,495,5,500,61.11,62.5,3,0,"Action limit reached"
+"unreachable","memory",42,500,55,6,61,100,100,2,2,"Reachable room explored"
+"unreachable","reflex",42,500,494,6,500,100,100,2,2,"Action limit reached"

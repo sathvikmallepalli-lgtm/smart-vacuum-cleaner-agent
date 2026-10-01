@@ -1,0 +1,33 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  agent-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check JavaScript syntax
+        run: |
+          node --check agent.js
+          node --check room.js
+          node --check app.js
+      - name: Test agent behavior
+        run: npm test
+      - name: Verify recorded experiments
+        run: |
+          node tests/record-results.js
+          git diff --exit-code -- results/preset-results.csv results/preset-results.json

@@ -1,0 +1,10 @@
+{
+  "name": "roomwise-vacuum-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Beginner-friendly FOA vacuum cleaner agent simulation",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "start": "python3 -m http.server 8080 --bind 127.0.0.1"
+  }
+}

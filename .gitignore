@@ -1,0 +1,29 @@
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
+
+# Dependencies, caches, and editor/system files
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+# Private academic plans and generated presentation files
+planning/
+.ppt-build/
+output/
+*.zip
+
+# Local screenshots and validation notes may contain student identifiers
+results/*.png
+results/VALIDATION.md
